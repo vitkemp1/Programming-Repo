@@ -25,9 +25,9 @@ public class PlayerController : MonoBehaviour
     }
     void rotateTurret()
     {
-        float rotationX = turret.transform.localEulerAngles.x;
-        float rotationY = turret.transform.localEulerAngles.y;
-        Debug.Log("Rotation x : "+rotationX);
+        float rotationX = switchDegree(turret.transform.localEulerAngles.x);        
+        float rotationY = switchDegree(turret.transform.localEulerAngles.y);
+        
         if (Input.GetKey(KeyCode.UpArrow)&&(rotationX<maxUpAngle))
         {
             rotateDirection("up");
@@ -37,15 +37,24 @@ public class PlayerController : MonoBehaviour
         {
             rotateDirection("down");
         }
-        if (Input.GetKey(KeyCode.LeftArrow))
+
+        if (Input.GetKey(KeyCode.LeftArrow)&&(rotationY>-1*maxYAxisAngle))
         {
             rotateDirection("left");
         }
 
-        if (Input.GetKey(KeyCode.RightArrow))
+        if (Input.GetKey(KeyCode.RightArrow)&&(rotationY<maxYAxisAngle))
         {
             rotateDirection("right");
         }
+    }
+    float switchDegree(float degree)
+    {
+        if (degree > 180)
+        {
+            degree -= 360;
+        }
+        return degree;
     }
     void rotateDirection(string direction)
     {        
