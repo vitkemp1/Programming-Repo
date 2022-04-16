@@ -6,10 +6,15 @@ using Unity.IO;
 public class PlayerController : MonoBehaviour
 {
     private float maxUpAngle=20;
-    private float minDownAngle=-50;
-    private float maxYAxisAngle=60;
-    private float rotationSpeed = 50;
+    private float minDownAngle=-30;
+    private float maxYAxisAngle=55;
+    private float rotationSpeed = 30;
+    private bool canShoot = true;
+    private float delayInSeconds = 0.05f;    
+    public GameObject barrelEnd;
+    public GameObject bullets;
     public GameObject turret;
+    public GameObject ShootingParticle;
 
     // Start is called before the first frame update
     void Start()
@@ -21,29 +26,47 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         rotateTurret();
+        shootTurret();
+    }
 
+    void shootTurret()
+    {
+        if (Input.GetKey(KeyCode.Space)&&(canShoot))
+        {            
+            StartCoroutine(spawnBullets());
+            canShoot = false;
+            StartCoroutine(ShootDelay());
+        }
+        
+    }
+    IEnumerator spawnBullets()
+    {
+        yield return new WaitForSeconds(0f);
+        Vector3 barrelPos = barrelEnd.transform.position;
+        Instantiate(bullets, barrelPos, turret.transform.rotation);
+        Instantiate(ShootingParticle, barrelPos, turret.transform.rotation);
     }
     void rotateTurret()
     {
         float rotationX = switchDegree(turret.transform.localEulerAngles.x);        
         float rotationY = switchDegree(turret.transform.localEulerAngles.y);
         
-        if (Input.GetKey(KeyCode.UpArrow)&&(rotationX<maxUpAngle))
+        if (Input.GetKey(KeyCode.UpArrow)&&(rotationX> minDownAngle))
         {
-            rotateDirection("up");
+            rotateDirection("up");            
         }
 
-        if (Input.GetKey(KeyCode.DownArrow)&&(rotationX>minDownAngle))
+        if (Input.GetKey(KeyCode.DownArrow)&&(rotationX< maxUpAngle))
         {
             rotateDirection("down");
         }
 
-        if (Input.GetKey(KeyCode.LeftArrow)&&(rotationY>-1*maxYAxisAngle))
+        if (Input.GetKey(KeyCode.LeftArrow)&&(rotationY > -1 * maxYAxisAngle))
         {
             rotateDirection("left");
         }
 
-        if (Input.GetKey(KeyCode.RightArrow)&&(rotationY<maxYAxisAngle))
+        if (Input.GetKey(KeyCode.RightArrow)&&(rotationY <  maxYAxisAngle))
         {
             rotateDirection("right");
         }
@@ -69,12 +92,17 @@ public class PlayerController : MonoBehaviour
                 break;
 
             case "up":
-                turret.transform.Rotate(Vector3.right * Time.deltaTime * rotationSpeed, Space.Self);
+                turret.transform.Rotate(Vector3.left * Time.deltaTime * rotationSpeed, Space.Self);
                 break;
 
             case "down":
-                turret.transform.Rotate(Vector3.left * Time.deltaTime * rotationSpeed, Space.Self);
+                turret.transform.Rotate(Vector3.right * Time.deltaTime * rotationSpeed, Space.Self);
                 break;
         }
+    }
+    IEnumerator ShootDelay()
+    {
+        yield return new WaitForSeconds(delayInSeconds);
+        canShoot = true;
     }
 }
