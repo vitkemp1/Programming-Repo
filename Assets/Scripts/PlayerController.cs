@@ -2,37 +2,84 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.IO;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
+    private GameObject introBox;
+    private Timer gameTimer;
     private float maxUpAngle=20;
     private float minDownAngle=-30;
     private float maxYAxisAngle=55;
     private float rotationSpeed = 30;
     private bool canShoot = true;
-    private float delayInSeconds = 0.05f;    
+    private float delayInSeconds = 0.1f;    
+    private float shootVolume =1;
+    public AudioSource audioSource;
+    public bool isGameOver = false;
+    public bool isGameStarted = false;
+    public int overalHits = 0;
+    public int overalScore = 0;
+    public int shipHealth = 100;       
+    public Text scoreText;
+    public Text hitsText;
+    public Text shipHealthText;
     public GameObject barrelEnd;
     public GameObject bullets;
     public GameObject turret;
     public GameObject ShootingParticle;
+    public AudioClip shootingSound;
+    public AudioClip backgroundMusic;
+    
+    
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        gameTimer = GameObject.Find("Timer").GetComponent<Timer>();
+        introBox = GameObject.Find("IntroBox");
     }
 
     // Update is called once per frame
     void Update()
     {
-        rotateTurret();
-        shootTurret();
+        if (isGameStarted)
+        {
+            rotateTurret();
+            shootTurret();
+            displayScore();
+        }
+        
     }
+    public void startGame()
+    {
+        audioSource.PlayOneShot(backgroundMusic);
+        overalScore = 0;
+        overalHits = 0;
+        gameTimer.startTimer();
+        displayScore();
+        isGameStarted = true;
+        introBox.SetActive(false);
 
+    }
+    public void stopGame()
+    {
+        isGameStarted = false;
+        introBox.SetActive(true);
+    }
+    
+    void displayScore()
+    {
+        scoreText.text = "Score : " + overalScore;
+        hitsText.text = "Hits : " + overalHits;
+        if (shipHealth < 0) shipHealth = 0;
+        shipHealthText.text = "Ship Health : " + shipHealth;
+    }
     void shootTurret()
     {
         if (Input.GetKey(KeyCode.Space)&&(canShoot))
-        {            
+        {
+            audioSource.PlayOneShot(shootingSound);
             StartCoroutine(spawnBullets());
             canShoot = false;
             StartCoroutine(ShootDelay());
